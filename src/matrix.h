@@ -11,6 +11,10 @@ using namespace std;
 // Forward declaring the Matrix class to incoporate a template operator<<
 template <typename T> class Matrix;
 template <typename T> ostream& operator<<(ostream& , const Matrix<T>& );
+template <typename T, typename K> Matrix<T> operator+(K, const Matrix<T>&);
+template <typename T, typename K> Matrix<T> operator-(K, const Matrix<T>&);
+template <typename T, typename K> Matrix<T> operator*(K, const Matrix<T>&);
+template <typename T, typename K> Matrix<T> operator/(K, const Matrix<T>&);
 template <typename T> Matrix<T> Id(vector<unsigned int>);
 
 template <typename T>
@@ -23,6 +27,7 @@ class Matrix
         Matrix(vector<unsigned int> shape,  T init);
         Matrix(const Matrix& copy);
         Matrix(const vector<T> elements);
+        Matrix();
         ~Matrix();
 
         friend ostream& operator<< <T>(ostream& out, const Matrix<T>& rhs);
@@ -46,9 +51,10 @@ class Matrix
         Matrix<T> slice(vector<unsigned int> rows, vector<unsigned int>cols);
         Matrix<T> flatten();
         Matrix<T> get_row(unsigned int idx);
-        Matrix<T> set_row(unsigned int idx, Matrix<T> row);
+        void set_row(unsigned int idx, const Matrix<T>& row);
         Matrix<T> reshape(vector<unsigned int> shape);
         Matrix<T> inv();
+        Matrix<T> dot(const Matrix<T>& rhs);
 
 };
 

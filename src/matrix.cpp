@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <cassert>
+#include <math.h>
 #include "matrix.h"
 
 using namespace std;
@@ -62,6 +63,15 @@ Matrix<T>::Matrix(const vector<T> elements)
         single_row[0] = elements[i];
         this->mat[i] = single_row;
     }
+}
+
+template <typename T>
+Matrix<T>::Matrix()
+{
+    this->ncols = 0;
+    this->nrows = 0;
+    this->mat = NULL;
+
 }
 
 template <typename T>
@@ -171,6 +181,21 @@ Matrix<T> Matrix<T>::operator+(T scalar)
 
 }
 
+template <typename T, typename K> 
+Matrix<T> operator+(K scalar, const Matrix<T>& rhs)
+{
+    Matrix<T> out(rhs.shape(), T(0));
+    for (unsigned int i = 0; i < rhs.rows(); i++)
+    {
+        for (unsigned int j = 0; j < rhs.cols(); j++)
+        {
+            out[i][j] = (T)scalar + rhs[i][j];
+        }
+
+    }
+    return out;
+}
+
 
 template <typename T>
 Matrix<T> Matrix<T>::operator-(const Matrix& rhs)
@@ -206,21 +231,42 @@ Matrix<T> Matrix<T>::operator-(T scalar)
 
 }
 
-template <typename T>
-Matrix<T> Matrix<T>::operator*(const Matrix& rhs)
+template <typename T, typename K> 
+Matrix<T> operator-(K scalar, const Matrix<T>& rhs)
 {
-    assert(this->ncols == rhs.nrows);
-    Matrix<T> out({this->nrows, rhs.ncols}, (T)0);
+    Matrix<T> out(rhs.shape(), T(0));
+    for (unsigned int i = 0; i < rhs.rows(); i++)
+    {
+        for (unsigned int j = 0; j < rhs.cols(); j++)
+        {
+            out[i][j] = (T)scalar - rhs[i][j];
+        }
 
+    }
+    return out;
+
+}
+
+
+/* Element-wise Multiplication. For matrix multiplication, 
+see Matrix<T>::dot(const Matrix<T>&)
+Arguments:
+    rhs (const Matrix<T>&): right hand side of the * sign.
+Returns:
+    out (Matrix<T>): the element-wise product of this and rhs.
+*/
+template <typename T>
+Matrix<T> Matrix<T>::operator*(const Matrix<T>& rhs)
+{
+    assert(this->nrows == rhs.nrows && this->ncols == rhs.ncols);
+    Matrix<T> out({this->nrows, this->ncols},(T)0);
     for (unsigned int i = 0; i < this->nrows; i++)
     {
-        for (unsigned int k = 0; k < rhs.ncols; k++)
+        for (unsigned int j = 0; j < this->ncols; j++)
         {
-            for (unsigned int j = 0; j < this->ncols; j++)
-            {
-                out.mat[i][k] += this->mat[i][j]*rhs.mat[j][k];
-            }
+            out[i][j] = this->mat[i][j] * rhs.mat[i][j];
         }
+
     }
     return out;
 }
@@ -238,6 +284,22 @@ Matrix<T> Matrix<T>::operator*(const T scalar)
 
     }
     return out;
+}
+
+template <typename T, typename K> 
+Matrix<T> operator*(K scalar, const Matrix<T>& rhs)
+{
+    Matrix<T> out(rhs.shape(), T(0));
+    for (unsigned int i = 0; i < rhs.rows(); i++)
+    {
+        for (unsigned int j = 0; j < rhs.cols(); j++)
+        {
+            out[i][j] = (T)scalar * rhs[i][j];
+        }
+
+    }
+    return out;
+
 }
 
 
@@ -272,7 +334,20 @@ Matrix<T> Matrix<T>::operator/(const T scalar)
     return out;
 }
 
+template <typename T, typename K> 
+Matrix<T> operator/(K scalar, const Matrix<T>& rhs)
+{
+    Matrix<T> out(rhs.shape(), T(0));
+    for (unsigned int i = 0; i < rhs.rows(); i++)
+    {
+        for (unsigned int j = 0; j < rhs.cols(); j++)
+        {
+            out[i][j] = (T)scalar / rhs[i][j];
+        }
 
+    }
+    return out;
+}
 
 
 
@@ -382,18 +457,22 @@ Matrix<T> Matrix<T>::get_row(unsigned int idx)
     return out;
 }
 
+/*
+Sets a row of a Matrix to a (1 x m) Matrix representing a row
+Arguments:
+    idx (uint): the index of the row to insert into
+    row (const Matrix<T>&): the (1 x m) row slice
+*/
 template <typename T>
-Matrix<T> Matrix<T>::set_row(unsigned int idx, Matrix<T> row)
+void Matrix<T>::set_row(unsigned int idx, const Matrix<T>& row)
 {
     assert(row.nrows == 1);
     assert(row.ncols == this->ncols);
-    Matrix<T> out = *this;
 
     for (int i = 0; i < this->ncols; i++)
     {
-        out.mat[idx][i] = row.mat[0][i];
+        this->mat[idx][i] = row.mat[0][i];
     }
-    return out;
 }
 
 template <typename T>
@@ -425,6 +504,14 @@ Matrix<T> Id(vector<unsigned int> shape)
     return identity;
 }
 
+
+/*
+Calculates the matrix inverse of a square matrix.
+This method uses gaussian-elimination method to 
+reach the identity matrix. Note that not all square 
+matrices are invertable. If not invertable, throws 
+SIGABRT.
+*/
 template <typename T>
 Matrix<T> Matrix<T>::inv()
 {
@@ -433,104 +520,71 @@ Matrix<T> Matrix<T>::inv()
     Matrix<T> out = Id<T>({this->nrows, this->nrows});
 
     for (int j = 0; j < this->nrows; j++)
-    {            
+    {   
+        // Normalizes an eliminating row with the 
+        // value at copy[j][j] to get a leading 1.
         T main_factor = copy.mat[j][j];
         Matrix<T> main_row = copy.get_row(j);
         main_row = main_row/main_factor;
-        copy = copy.set_row(j, main_row);
+        copy.set_row(j, main_row);
 
+        // performs the same action to the identity matrix
         Matrix<T> i_row = out.get_row(j);
         i_row = i_row / main_factor;
-        out = out.set_row(j, i_row);
+        out.set_row(j, i_row);
         for (int i = 0; i < this->nrows; i++)
         {
 
             if (i != j)
             {
+                // All other rows that are not the elimination row
+                // will get a column eliminated by the leading 1
                 Matrix<T> reduced_row = copy.get_row(i);
                 T reducing_factor = copy.mat[i][j];
                 reduced_row = reduced_row - main_row*reducing_factor;
-                copy = copy.set_row(i, reduced_row);
+                copy.set_row(i, reduced_row);
 
+                // do the same with the identity matrix
                 Matrix<T> reduced_row_i = out.get_row(i);
                 reduced_row_i = reduced_row_i - i_row*reducing_factor;
-                out = out.set_row(i, reduced_row_i);
+                out.set_row(i, reduced_row_i);
             }
+        }
+    }
+
+    // checks if any number is NaN, which implies singularity
+    for (int i = 0; i < this->nrows; i++)
+    {
+        if (isnan(this->mat[i][i]))
+        {
+            cout << "Matrix is not invertible" << endl;
+            throw -1;
         }
     }
     return out;
 }
 
-/*
-This function is never invoked;
-Its sole purpose is to implement
-various template types for the matrix
-class so that the linker knows how to 
-link with train.o
-
-Seriously, templates are cool but 
-the linker sucks
-*/
-void link_helper()
+template <typename T>
+Matrix<T> Matrix<T>::dot(const Matrix<T>& rhs)
 {
-    Matrix<float> helperFloat({1, 1}, 0.0);
-    Matrix<double> helperDoub({1, 1}, 0.0);
-    Matrix<int> helperInt({1, 1}, 0);
-    cout << helperFloat;
-    cout << helperInt;
-    cout << helperDoub;
-    helperFloat=helperFloat+1.0 + helperFloat/helperFloat - helperFloat*helperFloat/2.0;
-    helperDoub=helperDoub+1.0 + helperDoub/helperDoub - helperDoub*helperDoub/2.0;
-    helperInt=helperInt+1 + helperInt/helperInt - helperInt*helperInt/2;
-    helperFloat[0][0] = 0.0;
-    helperDoub[0][0] = 0.0;
-    helperInt[0][0] = 0;
-    Matrix<float> X = helperFloat;
-    Matrix<double> Y = helperDoub;
-    Matrix<int> Z = helperInt;
-    X.rows();
-    X.cols();
-    X.size();
-    X.shape();
-    X.tp();
-    X.flatten();
-    Matrix<float> rX = X.get_row(0);
-    X.set_row(0, rX);
-    X.slice({1, 2}, {3, 4});
-    X.reshape({1, 1});
-    Y.rows();
-    Y.cols();
-    Y.size();
-    Y.shape();
-    Y.tp();
-    Y.flatten();
-    Matrix<double> rY = Y.get_row(0);
-    Y.set_row(0, rY);
-    Y.slice({1, 2}, {3, 4});
-    Y.reshape({1, 1});
-    Z.rows();
-    Z.cols();
-    Z.size();
-    Z.shape();
-    Z.tp();
-    Z.flatten();
-    Matrix<int> rZ = Z.get_row(0);
-    Z.set_row(0, rZ);
-    Z.slice({1, 2}, {3, 4});
-    Z.reshape({1, 1});
-    const Matrix<float> chelperFloat({1, 1}, 0.0);
-    const Matrix<double> chelperDoub({1, 1}, 0.0);
-    const Matrix<int> chelperInt({1, 1}, 0);
-    cout << chelperFloat[0][0] << endl;
-    cout << chelperDoub[0][0] << endl;
-    cout << chelperInt[0][0] << endl;
-    Matrix<float> A({0.0});
-    Matrix<double> B({0.0});
-    Matrix<int> C({0}); 
-    Id<float>({1, 1});
-    Id<double>({1, 1});
-    Id<int>({1, 1});
-    A.inv();
-    B.inv();
-    C.inv();
+    assert(this->ncols == rhs.nrows);
+    Matrix<T> out({this->nrows, rhs.ncols}, (T)0);
+
+    for (unsigned int i = 0; i < this->nrows; i++)
+    {
+        for (unsigned int k = 0; k < rhs.ncols; k++)
+        {
+            for (unsigned int j = 0; j < this->ncols; j++)
+            {
+                out.mat[i][k] += this->mat[i][j]*rhs.mat[j][k];
+            }
+        }
+    }
+    return out;
+
 }
+
+
+
+
+#include "matrix_implementer.h"
