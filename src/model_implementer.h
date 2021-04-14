@@ -13,6 +13,8 @@ void linker_helper3 ()
     D.add_layer(l2);
     cout << C << endl;
     cout << D << endl;
+    C.connect();
+    D.connect();
 
 }
 

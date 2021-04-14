@@ -32,11 +32,73 @@ struct Layer
 
     friend ostream& operator<< <T> (ostream& out, const Layer<T>& rhs);
 
+    // calculates the activation based on this->activation
     Matrix<T> act(const Matrix<T>& wsum);
+    // calculates the derivative of the activation based on this->activation
     Matrix<T> d_act(const Matrix<T>& layer);
+    void init_params();
     unsigned int size() const;
 
 };
+
+
+template <class T>
+Layer<T>::Layer(unsigned int nodes, string activation)
+{
+    this->z = Matrix<T>({nodes, 1}, (T)0);
+    this->dz = Matrix<T>({nodes, 1}, (T)0);
+    this->a = Matrix<T>({nodes, 1}, (T)0);
+    this->activation = activation;
+
+}
+
+template <class T>
+ostream& operator<<(ostream& out, const Layer<T>& rhs)
+{
+    out << rhs.a << endl;
+    return out;
+}
+
+template <class T>
+Matrix<T> Layer<T>::act(const Matrix<T>& wsum)
+{
+    if (this->activation == "sigmoid")
+    {
+        return sigmoid(wsum);
+    }
+    else if (this->activation == "relu")
+    {
+        return relu(wsum);
+    }
+    // linear activation
+    return wsum;
+}
+
+
+
+
+
+
+
+
+
+
+/*
+Initializes the weights randomly, and sets bias to 0.
+*/
+template <class T>
+void Layer<T>::init_params()
+{
+    assert(this->W.size() != 0);
+    this->W = randmat<T>(this->W.shape(), 0.02);
+    this->b = zeros<T>(this->b.shape());
+}
+
+template <class T>
+unsigned int Layer<T>::size() const
+{
+    return this->z.size();
+}
 
 
 
