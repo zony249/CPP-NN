@@ -32,14 +32,17 @@ struct Layer
 
     friend ostream& operator<< <T> (ostream& out, const Layer<T>& rhs);
 
+
     // calculates the activation based on this->activation
     Matrix<T> act(const Matrix<T>& wsum);
     // calculates the derivative of the activation based on this->activation
     Matrix<T> d_act(const Matrix<T>& layer);
     void init_params();
+
     unsigned int size() const;
 
 };
+
 
 
 template <class T>
@@ -99,7 +102,6 @@ unsigned int Layer<T>::size() const
 {
     return this->z.size();
 }
-
 
 
 #endif

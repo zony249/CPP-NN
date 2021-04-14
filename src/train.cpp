@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 #include "matrix.h"
 #include "layer.h"
 #include "model.h"
@@ -24,6 +25,7 @@ int main(int argc, char* argv[])
     model.connect();
 
     cout << model << endl;
+
 
     cout << "testing exp()" << endl;
     vector<float> items = {1, 2, 3, 4, 5, 6};

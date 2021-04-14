@@ -7,6 +7,7 @@
 #include <cassert>
 #include <math.h>
 
+
 using namespace std;
 
 // Forward declaring the Matrix class to incoporate a template operator<<
@@ -23,6 +24,8 @@ template <typename T> Matrix<T> sigmoid(const Matrix<T>&);
 template <typename T> Matrix<T> exp(const Matrix<T>&);
 template <typename T, typename K> T max(T, K);
 template <typename T> Matrix<T> relu(const Matrix<T>&);
+
+
 
 template <typename T>
 class Matrix
@@ -65,6 +68,7 @@ class Matrix
         Matrix<T> dot(const Matrix<T>& rhs);
 
 };
+
 
 /*
 Initializes a matix of (rows x cols) with an initial value
@@ -722,6 +726,7 @@ Matrix<T> relu(const Matrix<T>& arg)
     }
     return out;
 }
+
 
 
 #endif

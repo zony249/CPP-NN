@@ -14,9 +14,11 @@ Model<T>::Model(double lr, double reg)
 }
 
 
+
 /*
 Default constructor for default learning rate and regularization values
 */
+
 template <class T>
 Model<T>::Model()
 {
@@ -42,6 +44,7 @@ ostream& operator<<(ostream& out, const Model<T>& rhs)
             out << rhs.layers[i].b.shape()[1] << ")" << '\t';
             out << "Activation: " << rhs.layers[i].activation << endl;
         }
+
     }
     return out;
 
@@ -53,6 +56,7 @@ void Model<T>::add_layer(Layer<T> layer)
 {
     this->layers.push_back(layer);
 }
+
 
 
 /*

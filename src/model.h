@@ -6,6 +6,7 @@
 #include <vector>
 #include <utility>
 
+
 using namespace std;
 
 template <class T> class Model;
@@ -27,6 +28,7 @@ class Model
         friend ostream& operator<< <T>(ostream& out, const Model<T>& rhs);
 
         void add_layer(Layer<T> layer);
+
         void connect();
         void load_training_data(vector<pair<Matrix<T>, Matrix<T> > > );
 
