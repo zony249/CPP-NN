@@ -708,8 +708,8 @@ Matrix<T> sigmoid(const Matrix<T>& arg)
 template <typename T, typename K>
 T max(T a, K b)
 {
-    if (a > (T)b) return a;
-    else return (T)b;
+    if ((K)a > b) return (K)a;
+    else return b;
 }
 
 template <typename T>
@@ -720,7 +720,7 @@ Matrix<T> relu(const Matrix<T>& arg)
     {
         for (int j = 0; j < arg.cols(); j++)
         {
-            out[i][j] = max(0, arg[i][j]);
+            out[i][j] = max(0.0, arg[i][j]);
         }
     
     }

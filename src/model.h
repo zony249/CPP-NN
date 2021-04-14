@@ -20,6 +20,8 @@ class Model
         vector<Layer<T> > layers;
         double lr;
         double reg;
+        vector<pair<Matrix<T>, Matrix<T> > >* trainset;
+        vector<pair<Matrix<T>, Matrix<T> > >* cvset;
     public:
 
         Model(double lr, double reg);
@@ -30,10 +32,11 @@ class Model
         void add_layer(Layer<T> layer);
 
         void connect();
-        void load_training_data(vector<pair<Matrix<T>, Matrix<T> > > );
+        void load_training_data(vector<pair<Matrix<T>, Matrix<T> > >* dataset);
+        void load_cv_data(vector<pair<Matrix<T>, Matrix<T> > >* dataset);
 
-        void forward_prop(Matrix<T> x);
-        void back_prop(Matrix<T> y);
+        void forward_prop(const Matrix<T>& x);
+        void back_prop(const Matrix<T>& y);
 
 };
 
