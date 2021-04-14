@@ -4,6 +4,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+<<<<<<< HEAD
+=======
+#include <utility>
+>>>>>>> fce2300 (Nuked repo. retransferring files)
 
 using namespace std;
 
@@ -26,6 +30,14 @@ class Model
         friend ostream& operator<< <T>(ostream& out, const Model<T>& rhs);
 
         void add_layer(Layer<T> layer);
+<<<<<<< HEAD
+=======
+        void connect();
+        void load_training_data(vector<pair<Matrix<T>, Matrix<T> > > );
+
+        void forward_prop(Matrix<T> x);
+        void back_prop(Matrix<T> y);
+>>>>>>> fce2300 (Nuked repo. retransferring files)
 
 };
 

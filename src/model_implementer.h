@@ -13,6 +13,11 @@ void linker_helper3 ()
     D.add_layer(l2);
     cout << C << endl;
     cout << D << endl;
+<<<<<<< HEAD
+=======
+    C.connect();
+    D.connect();
+>>>>>>> fce2300 (Nuked repo. retransferring files)
 
 }
 

@@ -1,2 +1,7 @@
 *.o
+<<<<<<< HEAD
 train
+=======
+train
+MNIST*data*set/*
+>>>>>>> fce2300 (Nuked repo. retransferring files)
