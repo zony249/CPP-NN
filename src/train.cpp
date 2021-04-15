@@ -39,8 +39,17 @@ int main(int argc, char* argv[])
     model.connect();
 
     Matrix<float> x = Matrix<float>({1., 2., 3., 4.}).tp();
+    Matrix<float> y = Matrix<float>({1, 0}).tp();
+
     cout << x << endl;
     model.forward_prop(x);
+    model.back_prop(y);
+
+    // Matrix<float> A = Matrix<float>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}).reshape({2, 5});
+    // Matrix<float> B = Matrix<float>({9, 8, 7, 6, 5, 4, 3, 2, 1, 0}).reshape({2, 5});
+
+    // A -= B;
+    // cout << A << endl;
 
 
     return 0;

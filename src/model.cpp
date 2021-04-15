@@ -98,17 +98,39 @@ void Model<T>::forward_prop(const Matrix<T>& x)
     assert(x.shape() == this->layers[0].a.shape());
 
     this->layers[0].a = x;
-    cout << "Input: \n" << this->layers[0].a << endl;
+    // cout << "Input: \n" << this->layers[0].a << endl;
     for (int i = 1; i < this->layers.size(); i++)
     {
         this->layers[i].z = this->layers[i].W.dot(this->layers[i-1].a) + this->layers[i].b;
         this->layers[i].a = this->layers[i].act(this->layers[i].z);
-        cout << "layer " << i << ":" << endl;
-        cout << "W: \n" << this->layers[i].W << endl;
-        cout << "z: \n" << this->layers[i].z << endl;
-        cout << "a: \n" << this->layers[i].a << endl;
+        // cout << "layer " << i << ":" << endl;
+        // cout << "W: \n" << this->layers[i].W << endl;
+        // cout << "z: \n" << this->layers[i].z << endl;
+        // cout << "a: \n" << this->layers[i].a << endl;
     }
 }
 
+
+template <class T>
+void Model<T>::back_prop(const Matrix<T>& y)
+{
+    int last = this->layers.size()-1;
+    assert(y.rows() == this->layers[last].a.rows());
+    // output layer
+    this->layers[last].dz = this->layers[last].a - y;
+    this->layers[last].dW += this->layers[last].dz.dot(this->layers[last-1].a.tp());
+    this->layers[last].db += this->layers[last].dz; 
+
+    // all other layers (except for input)
+    for (int i = last - 1; i >= 1; i--)
+    {
+        this->layers[i].dz = this->layers[i+1].W.tp().dot(this->layers[i+1].dz) *
+                            this->layers[i].d_act(this->layers[i].z);
+        //cout << "(" << this->layers[i].dW.rows() << ", " << this->layers[i].dW.cols() << ")" << endl;
+        this->layers[i].dW += this->layers[i].dz.dot(this->layers[i-1].a.tp());
+        this->layers[i].db += this->layers[i].dz; 
+    }
+
+}
 
 #include "model_implementer.h"

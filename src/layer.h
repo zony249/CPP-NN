@@ -77,6 +77,27 @@ Matrix<T> Layer<T>::act(const Matrix<T>& wsum)
     return wsum;
 }
 
+template <class T>
+Matrix<T> Layer<T>::d_act(const Matrix<T>& z_val)
+{
+    Matrix<T> out(z_val.shape(), 1);
+    if (this->activation == "sigmoid")
+    {
+        return sigmoid(z_val)*(1 - sigmoid(z_val));
+    } 
+    else if (this->activation == "relu")
+    {
+        for (int i = 0; i < z_val.rows(); i++)
+        {
+            if (z_val[i][0] > (T)0) out[i][0] = (T)1;
+            else out[i][0] = (T)0;
+        }   
+        return out;
+    }  
+    return out; 
+
+}
+
 
 
 
@@ -95,6 +116,10 @@ void Layer<T>::init_params()
     assert(this->W.size() != 0);
     this->W = randmat<T>(this->W.shape(), 0.02);
     this->b = zeros<T>(this->b.shape());
+
+    this->dW = zeros<T>(this->W.shape());
+    this->db = zeros<T>(this->b.shape());
+    this->dz = zeros<T> (this->z.shape());
 }
 
 template <class T>

@@ -25,8 +25,8 @@ void linker_helper3 ()
     D.load_cv_data(&dset);
     C.forward_prop(M);
     D.forward_prop(N);
-    //C.back_prop(M);
-    //D.back_prop(N);
+    C.back_prop(M);
+    D.back_prop(N);
 
 }
 

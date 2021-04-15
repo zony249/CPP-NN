@@ -53,6 +53,8 @@ class Matrix
         Matrix<T> operator*(const T scalar);
         Matrix<T> operator/(const Matrix& rhs);
         Matrix<T> operator/(const T scalar);
+        Matrix<T>& operator+=(const Matrix<T>& rhs);
+        Matrix<T>& operator-=(const Matrix<T>& rhs);
 
         unsigned int rows() const;
         unsigned int cols() const;
@@ -427,6 +429,34 @@ Matrix<T> operator/(K scalar, const Matrix<T>& rhs)
     return out;
 }
 
+template <typename T>
+Matrix<T>& Matrix<T>::operator+=(const Matrix<T>& rhs)
+{
+    assert(rhs.ncols == this->ncols && rhs.nrows == this->nrows);
+    for (int i = 0; i < this->nrows; i++)
+    {
+        for (int j = 0; j < this->ncols; j++)
+        {
+            this->mat[i][j] += rhs.mat[i][j];
+        }
+    }
+    return *this;
+
+}
+template <typename T>
+Matrix<T>& Matrix<T>::operator-=(const Matrix<T>& rhs)
+{
+    assert(rhs.ncols == this->ncols && rhs.nrows == this->nrows);
+    for (int i = 0; i < this->nrows; i++)
+    {
+        for (int j = 0; j < this->ncols; j++)
+        {
+            this->mat[i][j] -= rhs.mat[i][j];
+        }
+    }
+    return *this;
+
+}
 
 
 
