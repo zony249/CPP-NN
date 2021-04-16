@@ -101,7 +101,7 @@ void Model<T>::forward_prop(const Matrix<T>& x)
     // cout << "Input: \n" << this->layers[0].a << endl;
     for (int i = 1; i < this->layers.size(); i++)
     {
-        this->layers[i].z = this->layers[i].W.dot(this->layers[i-1].a) + this->layers[i].b;
+        this->layers[i].z = dot(this->layers[i].W, this->layers[i-1].a) + this->layers[i].b;
         this->layers[i].a = this->layers[i].act(this->layers[i].z);
         // cout << "layer " << i << ":" << endl;
         // cout << "W: \n" << this->layers[i].W << endl;
@@ -118,19 +118,56 @@ void Model<T>::back_prop(const Matrix<T>& y)
     assert(y.rows() == this->layers[last].a.rows());
     // output layer
     this->layers[last].dz = this->layers[last].a - y;
-    this->layers[last].dW += this->layers[last].dz.dot(this->layers[last-1].a.tp());
+    this->layers[last].dW += dot(this->layers[last].dz, this->layers[last-1].a.tp());
     this->layers[last].db += this->layers[last].dz; 
 
     // all other layers (except for input)
     for (int i = last - 1; i >= 1; i--)
     {
-        this->layers[i].dz = this->layers[i+1].W.tp().dot(this->layers[i+1].dz) *
+        this->layers[i].dz = dot(this->layers[i+1].W.tp(), this->layers[i+1].dz) *
                             this->layers[i].d_act(this->layers[i].z);
         //cout << "(" << this->layers[i].dW.rows() << ", " << this->layers[i].dW.cols() << ")" << endl;
-        this->layers[i].dW += this->layers[i].dz.dot(this->layers[i-1].a.tp());
+        this->layers[i].dW += dot(this->layers[i].dz, this->layers[i-1].a.tp());
         this->layers[i].db += this->layers[i].dz; 
     }
 
+}
+
+template <class T>
+T Model<T>::loss(const Matrix<T>& a, const Matrix<T>& y)
+{
+    unsigned int n = a.rows();
+    T single_cost;
+    int last = this->layers.size()-1;
+    if (this->layers[last].activation == "sigmoid")
+    {
+        single_cost = sum(-y*log(a)-(1-y)*log(1-a), 0)[0][0]/n;
+    } 
+    else if (this->layers[last].activation == "relu")
+    {
+        single_cost = sum((a - y)*(a - y), 0)[0][0]/n;
+    }
+       
+    return single_cost;
+}
+
+template <class T>
+void Model<T>::train(int batch_size)
+{
+    // trainset has to be loaded to train
+    assert(this->trainset != NULL);
+
+    int dataset_size = (*this->trainset).size();
+    for (int i = 0; i < dataset_size; i++)
+    {
+        Matrix<T> x = (*this->trainset)[i].first;
+        Matrix<T> y = (*this->trainset)[i].second;
+        this->forward_prop(x);
+        cout << "aL: \n" << this->layers[this->layers.size()-1] << endl;
+        cout << "y: \n" << y << endl;
+        cout << this->loss(this->layers[this->layers.size()-1].a, y) << endl;
+        this->back_prop(y);
+    }
 }
 
 #include "model_implementer.h"

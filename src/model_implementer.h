@@ -27,6 +27,8 @@ void linker_helper3 ()
     D.forward_prop(N);
     C.back_prop(M);
     D.back_prop(N);
+    C.train(16);
+    D.train(16);
 
 }
 

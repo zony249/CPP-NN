@@ -37,6 +37,8 @@ class Model
 
         void forward_prop(const Matrix<T>& x);
         void back_prop(const Matrix<T>& y);
+        T loss(const Matrix<T>& a, const Matrix<T>& y);
+        void train(int batch_size);
 
 };
 

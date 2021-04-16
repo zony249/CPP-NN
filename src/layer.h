@@ -58,7 +58,7 @@ Layer<T>::Layer(unsigned int nodes, string activation)
 template <class T>
 ostream& operator<<(ostream& out, const Layer<T>& rhs)
 {
-    out << rhs.a << endl;
+    out << rhs.a;
     return out;
 }
 

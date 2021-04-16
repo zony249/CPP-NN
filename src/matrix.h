@@ -20,10 +20,14 @@ template <typename T, typename K> Matrix<T> operator/(K, const Matrix<T>&);
 template <typename T> Matrix<T> Id(vector<unsigned int>);
 template <typename T, typename K> Matrix<T> randmat(vector<unsigned int>, K);
 template <typename T> Matrix<T> zeros(vector<unsigned int>);
+template <typename T> Matrix<T> dot(const Matrix<T>&, const Matrix<T>&);
 template <typename T> Matrix<T> sigmoid(const Matrix<T>&);
 template <typename T> Matrix<T> exp(const Matrix<T>&);
 template <typename T, typename K> T max(T, K);
 template <typename T> Matrix<T> relu(const Matrix<T>&);
+template <typename T> T log(T n);
+template <typename T> Matrix<T> log(const Matrix<T>&);
+template <typename T> Matrix<T> sum(const Matrix<T>&, int);
 
 
 
@@ -67,7 +71,6 @@ class Matrix
         void set_row(unsigned int idx, const Matrix<T>& row);
         Matrix<T> reshape(vector<unsigned int> shape);
         Matrix<T> inv();
-        Matrix<T> dot(const Matrix<T>& rhs);
 
 };
 
@@ -694,25 +697,26 @@ Matrix<T> Matrix<T>::inv()
     return out;
 }
 
-template <typename T>
-Matrix<T> Matrix<T>::dot(const Matrix<T>& rhs)
-{
-    assert(this->ncols == rhs.nrows);
-    Matrix<T> out({this->nrows, rhs.ncols}, (T)0);
 
-    for (unsigned int i = 0; i < this->nrows; i++)
+template <typename T> 
+Matrix<T> dot(const Matrix<T>& lhs, const Matrix<T>& rhs)
+{
+    assert(lhs.cols() == rhs.rows());
+    Matrix<T> out({lhs.rows(), rhs.cols()}, (T)0);
+
+    for (unsigned int i = 0; i < lhs.rows(); i++)
     {
-        for (unsigned int k = 0; k < rhs.ncols; k++)
+        for (unsigned int k = 0; k < rhs.cols(); k++)
         {
-            for (unsigned int j = 0; j < this->ncols; j++)
+            for (unsigned int j = 0; j < lhs.cols(); j++)
             {
-                out.mat[i][k] += this->mat[i][j]*rhs.mat[j][k];
+                out[i][k] += lhs[i][j]*rhs[j][k];
             }
         }
     }
     return out;
-
 }
+
 
 template <typename T> 
 Matrix<T> exp(const Matrix<T>& arg)
@@ -757,6 +761,56 @@ Matrix<T> relu(const Matrix<T>& arg)
     return out;
 }
 
+template <typename T>
+T log(T n)
+{
+    return log(n)/log((T)2.718281828459045);
+}
 
+template <typename T>
+Matrix<T> log(const Matrix<T>& arg)
+{
+    Matrix<T> out = zeros<T>(arg.shape());
+    for (int i = 0; i < arg.rows(); i++)
+    {
+        for (int j = 0; j < arg.cols(); j++)
+        {
+            out[i][j] = log(arg[i][j]);
+        }
+    }
+    return out;
+}
+
+template <typename T> 
+Matrix<T> sum(const Matrix<T>& arg, int axis)
+{
+    assert(axis == 1 || axis == 0);
+    Matrix<T> out;
+    if (axis == 1)
+    {
+        out = zeros<T>({arg.rows(), 1});
+        for (int i = 0; i < arg.rows(); i++)
+        {
+            for (int j = 0; j < arg.cols(); j++)
+            {
+                out[i][0] += arg[i][j];
+            }
+        }
+
+    } else if (axis == 0)
+    {
+        out = zeros<T>({1, arg.cols()});
+        for (int i = 0; i < arg.rows(); i++)
+        {
+            for (int j = 0; j < arg.cols(); j++)
+            {
+                out[0][j] += arg[i][j];
+            }
+        }
+    }
+
+    return out;
+
+}
 
 #endif
