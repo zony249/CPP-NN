@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <cassert>
+#include <thread>
 #include "layer.h"
 #include "model.h"
 
@@ -86,7 +87,7 @@ void Model<T>::load_training_data(vector<pair<Matrix<T>, Matrix<T> > >* dataset)
 template <class T>
 void Model<T>::load_cv_data(vector<pair<Matrix<T>, Matrix<T> > >* dataset)
 {
-    this->cvset = cvset;
+    this->cvset = dataset;
 }
 
 
@@ -134,18 +135,19 @@ void Model<T>::back_prop(const Matrix<T>& y)
 }
 
 template <class T>
-T Model<T>::loss(const Matrix<T>& a, const Matrix<T>& y)
+T Model<T>::loss(Matrix<T>& a, Matrix<T>& y) const
 {
     unsigned int n = a.rows();
     T single_cost;
     int last = this->layers.size()-1;
     if (this->layers[last].activation == "sigmoid")
     {
-        single_cost = sum(-y*log(a)-(1-y)*log(1-a), 0)[0][0]/n;
+        //cout << -y*log(a)-(1-y)*log(1-a) << endl;
+        single_cost = sum<T>(-y*log(a)-(1-y)*log(1-a), 0)[0][0]/n;
     } 
     else if (this->layers[last].activation == "relu")
     {
-        single_cost = sum((a - y)*(a - y), 0)[0][0]/n;
+        single_cost = sum<T>((a-y)*(a-y), 0)[0][0]/n;
     }
        
     return single_cost;
@@ -157,17 +159,95 @@ void Model<T>::train(int batch_size)
     // trainset has to be loaded to train
     assert(this->trainset != NULL);
 
+    int batch_count = 0;
     int dataset_size = (*this->trainset).size();
+    int last = this->layers.size() - 1;
     for (int i = 0; i < dataset_size; i++)
     {
-        Matrix<T> x = (*this->trainset)[i].first;
-        Matrix<T> y = (*this->trainset)[i].second;
+        if (batch_count > batch_size)
+        {
+            batch_count = 0;
+            for (int i = 1; i <= last; i++)
+            {
+                this->layers[i].W -= this->lr * (this->layers[i].dW + this->reg * this->layers[i].W)/(T)batch_size;
+                this->layers[i].b -= this->lr * (this->layers[i].db)/(T)batch_size;
+                this->layers[i].dW = zeros<T>(this->layers[i].W.shape());
+                this->layers[i].db = zeros<T>(this->layers[i].b.shape());
+                
+            }
+
+        }
+        Matrix<T> x = (*this->trainset)[i].first.tp();
+        Matrix<T> y = (*this->trainset)[i].second.tp();
+        
         this->forward_prop(x);
-        cout << "aL: \n" << this->layers[this->layers.size()-1] << endl;
-        cout << "y: \n" << y << endl;
-        cout << this->loss(this->layers[this->layers.size()-1].a, y) << endl;
+        cout << "Training Iteration: " << i << ", ";
+        cout << "Loss: " << this->loss(this->layers[last].a, y) << endl;
+        //cout << this->layers[last].a << endl;
+        //cout << y << endl;
         this->back_prop(y);
+        batch_count ++;
     }
 }
 
+// template <class T>
+// void Model<T>::train(int batch_size)
+// {
+//     int nthreads = min(8, batch_size);
+//     int tset_size = (*this->trainset).size();
+    
+//     int dat_r = tset_size%batch_size;   // remaining datapoints at the end
+//     int dat_divs = (tset_size - dat_r)/batch_size;  // number of times to load a batch
+//     cout << "Dataset size: " << tset_size << endl;
+//     for (int i = 0; i < dat_divs; i++)
+//     {
+//         int num_to_process = batch_size;
+//         if (i == dat_divs -1)
+//             num_to_process = (batch_size + dat_r);
+
+//         // remainder to add to the end of the last thread
+//         // This is to ensure that if the dataset size is not 
+//         // divisible by the batch size, all datapoints will be
+//         // used for training.
+//         int r = num_to_process%nthreads;
+//         int per_thread = (num_to_process - r)/nthreads;
+        
+//         int t_start = i*batch_size;
+//         int t_end;
+
+//         vector<thread> th;
+
+//         // cout << i << ": " << endl;
+//         for (int j = 0; j < nthreads; j++)
+//         {
+//             t_end = t_start + per_thread;
+//             if (j == nthreads - 1)
+//                 t_end = i*batch_size + num_to_process;
+
+//             //cout << t_start << ", " << t_end << endl;
+//             th.push_back(thread(&Model<T>::train_thread, this, t_start, t_end));
+
+//             t_start = t_end; 
+//         } 
+
+//         for (int j = 0; j < nthreads; j++)
+//         {
+//             th[j].join();
+//         }
+//         //cout << endl << endl;
+//     }
+// }
+
+template <class T>
+void Model<T>::train_thread(int start, int end)
+{
+    for (int i = start; i < end; i++)
+    {
+        Matrix<T> x = (*this->trainset)[i].first.tp();
+        Matrix<T> y = (*this->trainset)[i].second.tp();
+        
+        this->forward_prop(x);
+        //this->back_prop(y);
+    }
+}
 #include "model_implementer.h"

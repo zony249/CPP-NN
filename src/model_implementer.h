@@ -29,7 +29,8 @@ void linker_helper3 ()
     D.back_prop(N);
     C.train(16);
     D.train(16);
-
+    C.train_thread(16, 14);
+    D.train_thread(16, 14);
 }
 
 #endif

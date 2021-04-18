@@ -24,6 +24,7 @@ template <typename T> Matrix<T> dot(const Matrix<T>&, const Matrix<T>&);
 template <typename T> Matrix<T> sigmoid(const Matrix<T>&);
 template <typename T> Matrix<T> exp(const Matrix<T>&);
 template <typename T, typename K> T max(T, K);
+template <typename T, typename K> T min(T, K);
 template <typename T> Matrix<T> relu(const Matrix<T>&);
 template <typename T> T log(T n);
 template <typename T> Matrix<T> log(const Matrix<T>&);
@@ -735,7 +736,9 @@ Matrix<T> exp(const Matrix<T>& arg)
 template <typename T>
 Matrix<T> sigmoid(const Matrix<T>& arg)
 {
-    Matrix<T> out = 1/(1 + exp(-arg));
+    T compress = 0.999999;
+    T offset = (1 - compress)/2;
+    Matrix<T> out = compress/(1 + exp(-arg)) + offset;
     return out;
 }
 
@@ -743,6 +746,13 @@ template <typename T, typename K>
 T max(T a, K b)
 {
     if ((K)a > b) return (K)a;
+    else return b;
+}
+
+template <typename T, typename K>
+T min(T a, K b)
+{
+    if ((K)a < b) return (K)a;
     else return b;
 }
 
