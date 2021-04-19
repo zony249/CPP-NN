@@ -23,14 +23,21 @@ void linker_helper3 ()
     C.load_cv_data(&fset);
     D.load_training_data(&dset);
     D.load_cv_data(&dset);
-    C.forward_prop(M);
-    D.forward_prop(N);
-    C.back_prop(M);
-    D.back_prop(N);
+
     C.train(16);
     D.train(16);
-    C.train_thread(16, 14);
-    D.train_thread(16, 14);
+    vector<Layer<float> > f;
+    vector<Layer<double> > d;
+    float lf;
+    double ld;
+    C.train_thread(16, 14, f, lf);
+    D.train_thread(16, 14, d, ld);
+    C.forward_prop(M, f);
+    D.forward_prop(N, d);
+    C.back_prop(M, f);
+    D.back_prop(N, d);
+    C.predict(M);
+    D.predict(N);
 }
 
 #endif

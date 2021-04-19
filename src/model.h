@@ -26,7 +26,7 @@ class Model
         
     public:
 
-        Model(double lr, double reg);
+        Model(T lr, T reg);
         Model();
 
         friend ostream& operator<< <T>(ostream& out, const Model<T>& rhs);
@@ -37,14 +37,19 @@ class Model
         void load_training_data(vector<pair<Matrix<T>, Matrix<T> > >* dataset);
         void load_cv_data(vector<pair<Matrix<T>, Matrix<T> > >* dataset);
 
-        void forward_prop(const Matrix<T>& x);
-        void back_prop(const Matrix<T>& y);
+        // void forward_prop(const Matrix<T>& x);
+        // void back_prop(const Matrix<T>& y);
 
-        //Matrix<T> forward_prop(const unordered_map<string, Matrix<T> >& params, const Matrix<T>& x);
+
+
+        void forward_prop(const Matrix<T>& x, vector<Layer<T> >& lays);
+        void back_prop(const Matrix<T>& y, vector<Layer<T> >& lays);
 
         T loss ( Matrix<T>& a, Matrix<T>& y) const;
         void train(int batch_size);
-        void train_thread(int start, int end);
+        void train_thread(int start, int end, vector<Layer<T> >& lays, T& thread_loss);
+
+        Matrix<T> predict(const Matrix<T>& x);
 
 };
 

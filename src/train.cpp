@@ -12,22 +12,36 @@ int main(int argc, char* argv[])
 {
 
     string train_filename = "MNIST-data-set/mnist_train.csv";
-    string test_filename = "NMIST-data-set/mnist_test.csv";
+    string test_filename = "MNIST-data-set/mnist_test.csv";
     vector <pair<Matrix<float>, Matrix<float> > > trainset = read_MNIST_csv<float> (train_filename);
+    vector <pair<Matrix<float>, Matrix<float> > > testset = read_MNIST_csv<float> (test_filename);
     cout << "Num of training data: " << trainset.size() << endl;
+    cout << "Num of testing data: " << testset.size() << endl;
     //cout << trainset[8010].second << endl;
 
-    Model<float> model(3e-2, 0.2);
+    Model<float> model(1e-3, 0.05);
     model.add_layer(Layer<float>(784, "linear"));
-    model.add_layer(Layer<float>(128, "relu"));
-    model.add_layer(Layer<float>(128, "relu"));
+    model.add_layer(Layer<float>(256, "relu"));
+    model.add_layer(Layer<float>(256, "relu"));
+    model.add_layer(Layer<float>(256, "relu"));
     model.add_layer(Layer<float>(10, "sigmoid"));
     model.connect();
 
     cout << model << endl;
 
     model.load_training_data(&trainset);
-    model.train(64);
+
+    //Layer<float> L(5, "relu");
+    //L.z = Matrix<float>({-2, -1, 0, 1, 2}).tp();
+    //cout << L.d_act(L.z) << endl; 
+
+    for (int i = 0; i < 1; i++) model.train(16);
+
+    for (int i = 0; i < 10; i++)
+    {   
+        cout << model.predict(trainset[i].first.tp()).tp() << endl;
+        cout << trainset[i].second << endl << endl << endl;
+    }
 
 
     //Matrix<float> x = train[4].first.tp();
