@@ -19,10 +19,17 @@ template <typename T, typename K> Matrix<T> operator/(K, const Matrix<T>&);
 template <typename T> Matrix<T> Id(vector<unsigned int>);
 template <typename T, typename K> Matrix<T> randmat(vector<unsigned int>, K);
 template <typename T> Matrix<T> zeros(vector<unsigned int>);
+template <typename T> Matrix<T> dot(const Matrix<T>&, const Matrix<T>&);
 template <typename T> Matrix<T> sigmoid(const Matrix<T>&);
 template <typename T> Matrix<T> exp(const Matrix<T>&);
 template <typename T, typename K> T max(T, K);
+template <typename T, typename K> T min(T, K);
 template <typename T> Matrix<T> relu(const Matrix<T>&);
+template <typename T> T log(T n);
+template <typename T> Matrix<T> log(const Matrix<T>&);
+template <typename T> Matrix<T> sum(const Matrix<T>&, int);
+
+
 
 template <typename T>
 class Matrix
@@ -33,7 +40,7 @@ class Matrix
     public:
         Matrix(vector<unsigned int> shape,  T init);
         Matrix(const Matrix& copy);
-        Matrix(const vector<T> elements);
+        Matrix(const vector<T>& elements);
         Matrix();
         ~Matrix();
 
@@ -50,6 +57,8 @@ class Matrix
         Matrix<T> operator*(const T scalar);
         Matrix<T> operator/(const Matrix& rhs);
         Matrix<T> operator/(const T scalar);
+        Matrix<T>& operator+=(const Matrix<T>& rhs);
+        Matrix<T>& operator-=(const Matrix<T>& rhs);
 
         unsigned int rows() const;
         unsigned int cols() const;
@@ -62,9 +71,9 @@ class Matrix
         void set_row(unsigned int idx, const Matrix<T>& row);
         Matrix<T> reshape(vector<unsigned int> shape);
         Matrix<T> inv();
-        Matrix<T> dot(const Matrix<T>& rhs);
 
 };
+
 
 /*
 Initializes a matix of (rows x cols) with an initial value
@@ -111,8 +120,15 @@ Matrix<T>::Matrix(const Matrix& copy)
     }
 }
 
+/*
+Matrix<T> constructor that makes a (1 x n) matrix from the 
+elements of a vector.
+Args:
+    elements (const vector<T>&): vector of type T containing 
+                                the elements of the matrix
+*/
 template <typename T>
-Matrix<T>::Matrix(const vector<T> elements)
+Matrix<T>::Matrix(const vector<T>& elements)
 {
     this->nrows = 1;
     this->ncols = elements.size();
@@ -125,6 +141,10 @@ Matrix<T>::Matrix(const vector<T> elements)
     this->mat[0] = single_row;
 }
 
+/*
+Default constructor with no arguments. Allows for 
+empty initialization.
+*/
 template <typename T>
 Matrix<T>::Matrix()
 {
@@ -134,6 +154,10 @@ Matrix<T>::Matrix()
 
 }
 
+/*
+Destructor, deallocating each array in the heap 
+that makes up the matrix.
+*/
 template <typename T>
 Matrix<T>::~Matrix()
 {
@@ -149,7 +173,16 @@ Matrix<T>::~Matrix()
 // =====  Operators ======== //
 
 
-
+/*
+Overloaded insertion operator used to print out the matrix
+to an output stream. Matrices are printed in scientific notation.
+Args: 
+    out (ostream&): the ostream object used to insert into.
+    rhs (const Matrix<T>&): An object of class Matrix<T> to print.
+Returns:
+    out (ostream&): Returning the ostream object allows for chaining
+                    the << operator.
+*/
 template <typename T>
 ostream& operator<<(ostream& out, const Matrix<T>& rhs)
 {
@@ -160,7 +193,7 @@ ostream& operator<<(ostream& out, const Matrix<T>& rhs)
             out  << scientific << rhs.mat[i][j];
             if (j != rhs.ncols-1) out << '\t';
         }
-        out << endl;
+        out << fixed << endl; // disables scientific
     }
     return out;
 }
@@ -423,6 +456,34 @@ Matrix<T> operator/(K scalar, const Matrix<T>& rhs)
     return out;
 }
 
+template <typename T>
+Matrix<T>& Matrix<T>::operator+=(const Matrix<T>& rhs)
+{
+    assert(rhs.ncols == this->ncols && rhs.nrows == this->nrows);
+    for (int i = 0; i < this->nrows; i++)
+    {
+        for (int j = 0; j < this->ncols; j++)
+        {
+            this->mat[i][j] += rhs.mat[i][j];
+        }
+    }
+    return *this;
+
+}
+template <typename T>
+Matrix<T>& Matrix<T>::operator-=(const Matrix<T>& rhs)
+{
+    assert(rhs.ncols == this->ncols && rhs.nrows == this->nrows);
+    for (int i = 0; i < this->nrows; i++)
+    {
+        for (int j = 0; j < this->ncols; j++)
+        {
+            this->mat[i][j] -= rhs.mat[i][j];
+        }
+    }
+    return *this;
+
+}
 
 
 
@@ -660,25 +721,26 @@ Matrix<T> Matrix<T>::inv()
     return out;
 }
 
-template <typename T>
-Matrix<T> Matrix<T>::dot(const Matrix<T>& rhs)
-{
-    assert(this->ncols == rhs.nrows);
-    Matrix<T> out({this->nrows, rhs.ncols}, (T)0);
 
-    for (unsigned int i = 0; i < this->nrows; i++)
+template <typename T> 
+Matrix<T> dot(const Matrix<T>& lhs, const Matrix<T>& rhs)
+{
+    assert(lhs.cols() == rhs.rows());
+    Matrix<T> out({lhs.rows(), rhs.cols()}, (T)0);
+
+    for (unsigned int i = 0; i < lhs.rows(); i++)
     {
-        for (unsigned int k = 0; k < rhs.ncols; k++)
+        for (unsigned int k = 0; k < rhs.cols(); k++)
         {
-            for (unsigned int j = 0; j < this->ncols; j++)
+            for (unsigned int j = 0; j < lhs.cols(); j++)
             {
-                out.mat[i][k] += this->mat[i][j]*rhs.mat[j][k];
+                out[i][k] += lhs[i][j]*rhs[j][k];
             }
         }
     }
     return out;
-
 }
+
 
 template <typename T> 
 Matrix<T> exp(const Matrix<T>& arg)
@@ -697,15 +759,24 @@ Matrix<T> exp(const Matrix<T>& arg)
 template <typename T>
 Matrix<T> sigmoid(const Matrix<T>& arg)
 {
-    Matrix<T> out = 1/(1 + exp(-arg));
+    T compress = 0.999999;
+    T offset = (1 - compress)/2;
+    Matrix<T> out = compress/(1 + exp(-arg)) + offset;
     return out;
 }
 
 template <typename T, typename K>
 T max(T a, K b)
 {
-    if (a > (T)b) return a;
-    else return (T)b;
+    if ((K)a > b) return (K)a;
+    else return b;
+}
+
+template <typename T, typename K>
+T min(T a, K b)
+{
+    if ((K)a < b) return (K)a;
+    else return b;
 }
 
 template <typename T>
@@ -716,12 +787,63 @@ Matrix<T> relu(const Matrix<T>& arg)
     {
         for (int j = 0; j < arg.cols(); j++)
         {
-            out[i][j] = max(0, arg[i][j]);
+            out[i][j] = max(0.0, arg[i][j]);
         }
     
     }
     return out;
 }
 
+template <typename T>
+T log(T n)
+{
+    return log(n)/log((T)2.718281828459045);
+}
+
+template <typename T>
+Matrix<T> log(const Matrix<T>& arg)
+{
+    Matrix<T> out = zeros<T>(arg.shape());
+    for (int i = 0; i < arg.rows(); i++)
+    {
+        for (int j = 0; j < arg.cols(); j++)
+        {
+            out[i][j] = log(arg[i][j]);
+        }
+    }
+    return out;
+}
+
+template <typename T> 
+Matrix<T> sum(const Matrix<T>& arg, int axis)
+{
+    assert(axis == 1 || axis == 0);
+    Matrix<T> out;
+    if (axis == 1)
+    {
+        out = zeros<T>({arg.rows(), 1});
+        for (int i = 0; i < arg.rows(); i++)
+        {
+            for (int j = 0; j < arg.cols(); j++)
+            {
+                out[i][0] += arg[i][j];
+            }
+        }
+
+    } else if (axis == 0)
+    {
+        out = zeros<T>({1, arg.cols()});
+        for (int i = 0; i < arg.rows(); i++)
+        {
+            for (int j = 0; j < arg.cols(); j++)
+            {
+                out[0][j] += arg[i][j];
+            }
+        }
+    }
+
+    return out;
+
+}
 
 #endif

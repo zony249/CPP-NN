@@ -29,8 +29,10 @@ struct Layer
 
     //methods
     Layer(unsigned int nodes, string activation);
+    Layer(const Layer<T>& rhs);
 
     friend ostream& operator<< <T> (ostream& out, const Layer<T>& rhs);
+
 
     // calculates the activation based on this->activation
     Matrix<T> act(const Matrix<T>& wsum);
@@ -53,9 +55,25 @@ Layer<T>::Layer(unsigned int nodes, string activation)
 }
 
 template <class T>
+Layer<T>::Layer(const Layer<T>& rhs)
+{
+    this->a = rhs.a;
+    this->z = rhs.z;    // pre-activation
+    this->dz = rhs.dz;   // Local layer error
+
+    this->W = rhs.W;    // Weights matrix
+    this->dW = rhs.dW;   // error in weights
+
+    this->b = rhs.b;    // bias 
+    this->db = rhs.db;   // error in bias
+
+    this->activation = rhs.activation;
+}
+
+template <class T>
 ostream& operator<<(ostream& out, const Layer<T>& rhs)
 {
-    out << rhs.a << endl;
+    out << rhs.a;
     return out;
 }
 
@@ -74,12 +92,29 @@ Matrix<T> Layer<T>::act(const Matrix<T>& wsum)
     return wsum;
 }
 
+/*
+Returns the derivative of this activation function (da/dz).
+Supported activation functions are "sigmoid", "relu", "linear".
+*/
+template <class T>
+Matrix<T> Layer<T>::d_act(const Matrix<T>& z_val)
+{
+    Matrix<T> out(z_val.shape(),(T)1);
+    if (this->activation == "sigmoid")
+    {
+        return sigmoid(z_val)*(1 - sigmoid(z_val));
+    } 
+    else if (this->activation == "relu")
+    {
+        for (int i = 0; i < z_val.rows(); i++)
+        {
+            if (z_val[i][0] < (T)0) out[i][0] = (T)0;           
+        }   
+        return out;
+    }  
+    return out; 
 
-
-
-
-
-
+}
 
 
 
@@ -90,8 +125,13 @@ template <class T>
 void Layer<T>::init_params()
 {
     assert(this->W.size() != 0);
-    this->W = randmat<T>(this->W.shape(), 0.02);
+    Matrix<T> offset(this->W.shape(), 0.01);
+    this->W = randmat<T>(this->W.shape(), 0.02) - offset;
     this->b = zeros<T>(this->b.shape());
+
+    this->dW = zeros<T>(this->W.shape());
+    this->db = zeros<T>(this->b.shape());
+    this->dz = zeros<T> (this->z.shape());
 }
 
 template <class T>
@@ -99,7 +139,6 @@ unsigned int Layer<T>::size() const
 {
     return this->z.size();
 }
-
 
 
 #endif

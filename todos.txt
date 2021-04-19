@@ -14,11 +14,15 @@ Layer members (DONE??????????)
 Layer act(const Matrix<T>&)     // chooses activation based on layer.activation, and applies activation
 layer d_act(const Matrix<T>&)   // based on layer.activation, get the derivative and apply to input
 
+k_folds_cv:   // Do this // do this later lol
 
-Model:  //start thinking about methods
+
+Model: 
+    last thing done: loss
+    currently working on: train
 
 
-k_folds_cv:   // Do this
+
 
 
     
