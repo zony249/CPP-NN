@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     cout << "Num of testing data: " << testset.size() << endl;
     //cout << trainset[8010].second << endl;
 
-    Model<float> model(1e-3, 0.05);
+    Model<float> model(1e-3, 0.1);
     model.add_layer(Layer<float>(784, "linear"));
     model.add_layer(Layer<float>(256, "relu"));
     model.add_layer(Layer<float>(256, "relu"));

@@ -41,7 +41,7 @@ class Matrix
     public:
         Matrix(vector<unsigned int> shape,  T init);
         Matrix(const Matrix& copy);
-        Matrix(const vector<T> elements);
+        Matrix(const vector<T>& elements);
         Matrix();
         ~Matrix();
 
@@ -121,8 +121,15 @@ Matrix<T>::Matrix(const Matrix& copy)
     }
 }
 
+/*
+Matrix<T> constructor that makes a (1 x n) matrix from the 
+elements of a vector.
+Args:
+    elements (const vector<T>&): vector of type T containing 
+                                the elements of the matrix
+*/
 template <typename T>
-Matrix<T>::Matrix(const vector<T> elements)
+Matrix<T>::Matrix(const vector<T>& elements)
 {
     this->nrows = 1;
     this->ncols = elements.size();
@@ -135,6 +142,10 @@ Matrix<T>::Matrix(const vector<T> elements)
     this->mat[0] = single_row;
 }
 
+/*
+Default constructor with no arguments. Allows for 
+empty initialization.
+*/
 template <typename T>
 Matrix<T>::Matrix()
 {
@@ -144,6 +155,10 @@ Matrix<T>::Matrix()
 
 }
 
+/*
+Destructor, deallocating each array in the heap 
+that makes up the matrix.
+*/
 template <typename T>
 Matrix<T>::~Matrix()
 {
@@ -159,7 +174,16 @@ Matrix<T>::~Matrix()
 // =====  Operators ======== //
 
 
-
+/*
+Overloaded insertion operator used to print out the matrix
+to an output stream. Matrices are printed in scientific notation.
+Args: 
+    out (ostream&): the ostream object used to insert into.
+    rhs (const Matrix<T>&): An object of class Matrix<T> to print.
+Returns:
+    out (ostream&): Returning the ostream object allows for chaining
+                    the << operator.
+*/
 template <typename T>
 ostream& operator<<(ostream& out, const Matrix<T>& rhs)
 {
@@ -170,7 +194,7 @@ ostream& operator<<(ostream& out, const Matrix<T>& rhs)
             out  << scientific << rhs.mat[i][j];
             if (j != rhs.ncols-1) out << '\t';
         }
-        out << endl;
+        out << fixed << endl; // disables scientific
     }
     return out;
 }

@@ -94,6 +94,10 @@ Matrix<T> Layer<T>::act(const Matrix<T>& wsum)
     return wsum;
 }
 
+/*
+Returns the derivative of this activation function (da/dz).
+Supported activation functions are "sigmoid", "relu", "linear".
+*/
 template <class T>
 Matrix<T> Layer<T>::d_act(const Matrix<T>& z_val)
 {
@@ -106,29 +110,13 @@ Matrix<T> Layer<T>::d_act(const Matrix<T>& z_val)
     {
         for (int i = 0; i < z_val.rows(); i++)
         {
-            //cout << z_val[i][0] << endl;
-            if (z_val[i][0] < (T)0) 
-            {    
-                //cout << "t" << endl;
-                out[i][0] = (T)0;
-            } else {
-                //cout << "f" << endl;
-            }
-        }
-        //cout << out << endl;
-        //return out.slice({0, 0}, {0, 0});   
+            if (z_val[i][0] < (T)0) out[i][0] = (T)0;           
+        }   
         return out;
     }  
     return out; 
 
 }
-
-
-
-
-
-
-
 
 
 
