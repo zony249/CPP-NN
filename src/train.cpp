@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <thread>
+#include <chrono>
 #include "matrix.h"
 #include "layer.h"
 #include "model.h"
@@ -16,7 +18,7 @@ int main(int argc, char* argv[])
     vector <pair<Matrix<float>, Matrix<float> > > trainset = read_MNIST_csv<float> (train_filename);
     vector <pair<Matrix<float>, Matrix<float> > > testset = read_MNIST_csv<float> (test_filename);
     cout << "Num of training data: " << trainset.size() << endl;
-    cout << "Num of testing data: " << testset.size() << endl;
+    cout << "Num of testing data: " << testset.size() << endl << endl;
     //cout << trainset[8010].second << endl;
 
     Model<float> model(1e-3, 0.1);
@@ -28,6 +30,10 @@ int main(int argc, char* argv[])
     model.connect();
 
     cout << model << endl;
+
+    cout << "Press Enter to start training" << endl;
+    string x;
+    getline(cin, x);
 
     model.load_training_data(&trainset);
 
