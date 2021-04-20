@@ -35,7 +35,9 @@ Model<T>::Model()
 template <class T>
 ostream& operator<<(ostream& out, const Model<T>& rhs)
 {
-    out << "Model Summary:" << endl;
+    out << "=================== Model Summary ====================" << endl;
+    out << "Learning Rate: " << rhs.lr << endl;
+    out << "Regularization (l2): " << rhs.reg << endl << endl;
     for (int i = 0; i < rhs.layers.size(); i++)
     {
         unsigned int size = rhs.layers[i].size();
