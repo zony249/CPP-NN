@@ -28,6 +28,7 @@ template <typename T> Matrix<T> relu(const Matrix<T>&);
 template <typename T> T log(T n);
 template <typename T> Matrix<T> log(const Matrix<T>&);
 template <typename T> Matrix<T> sum(const Matrix<T>&, int);
+template <typename T> vector<int> argmax(const Matrix<T>& arg);
 
 
 
@@ -843,6 +844,28 @@ Matrix<T> sum(const Matrix<T>& arg, int axis)
     }
 
     return out;
+
+}
+
+template <typename T> 
+vector<int> argmax(const Matrix<T>& arg)
+{
+    assert(arg.rows() > 0 && arg.cols() > 0);
+
+    vector<T> dims;
+    int row = 0, col = 0;
+    for (int i = 0; i < arg.rows(); i++)
+    {
+        for (int j = 0; j < arg.cols(); j++)
+        {
+            if (arg[i][j] > arg[row][col])
+            {
+                row = i;
+                col = j;
+            }        
+        }
+    }
+    return {row, col};
 
 }
 
