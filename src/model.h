@@ -50,6 +50,7 @@ class Model
         void train_thread(int start, int end, vector<Layer<T> >& lays, T& thread_loss);
 
         Matrix<T> predict(const Matrix<T>& x);
+        T evaluate();
 
 };
 
