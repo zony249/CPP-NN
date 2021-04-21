@@ -311,7 +311,7 @@ void Model<T>::train(int batch_size)
             this->layers[j].dW = zeros<T>(this->layers[j].W.shape());
             this->layers[j].db = zeros<T>(this->layers[j].b.shape());
         }
-        cout << "Batch " << i + 1 << " of " << dat_divs << ": ";
+        cout << "Batch " << i + 1 << " of " << dat_divs << "    ";
         cout << "loss: " << lossval << endl;
     }
 }
@@ -352,6 +352,39 @@ Matrix<T> Model<T>::predict(const Matrix<T>& x)
 
     Matrix<T> out = this->layers[last].a;
     return out;
+}
+
+template <class T>
+T Model<T>::evaluate()
+{
+    Matrix<T> x, y;
+    int cvsize = (*this->cvset).size();
+    int t_count = 0;
+    cout << "Evaluating model on " << cvsize << " cross val examples: ";
+    for (int i = 0; i < cvsize; i++)    
+    {
+        
+        cout << i + 1;
+        
+
+        x = (*this->cvset)[i].first.tp();
+        y = (*this->cvset)[i].second.tp();
+        Matrix<T> prediction = this->predict(x);
+        int ground_truth = argmax(y)[0];
+        int predicted = argmax(prediction)[0];
+        if (ground_truth == predicted)
+        {
+           t_count += 1;
+        }
+        int bspaces = i + 1;
+        while (bspaces)
+        {
+            bspaces/= 10;
+            cout << "\b";
+        }
+
+    } cout << endl;
+    return (T)t_count/(T)cvsize;
 }
 
 

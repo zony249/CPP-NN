@@ -38,6 +38,8 @@ void linker_helper3 ()
     D.back_prop(N, d);
     C.predict(M);
     D.predict(N);
+    C.evaluate();
+    D.evaluate();
 }
 
 #endif
