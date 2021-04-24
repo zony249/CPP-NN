@@ -1,3 +1,4 @@
 *.o
 train
 MNIST-data-set/*.csv
+.vscode/*
