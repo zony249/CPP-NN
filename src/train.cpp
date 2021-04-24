@@ -13,6 +13,8 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 
+    int epochs = 1;
+
     string train_filename = "MNIST-data-set/mnist_train.csv";
     string test_filename = "MNIST-data-set/mnist_test.csv";
     vector <pair<Matrix<float>, Matrix<float> > > trainset = read_MNIST_csv<float> (train_filename);
@@ -43,7 +45,7 @@ int main(int argc, char* argv[])
     //L.z = Matrix<float>({-2, -1, 0, 1, 2}).tp();
     //cout << L.d_act(L.z) << endl; 
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < epochs; i++)
     {   
         cout << "Epoch " << i+1 << " Starting... " << endl;
         this_thread::sleep_for(chrono::seconds(2));
