@@ -14,20 +14,19 @@ For a full breakdown of the NN, the `train` executable will print out the model 
 
 ```
 =================== Model Summary ====================
-Learning Rate: 0.001
-Regularization (l2): 0.1
+Learning Rate: 0.0008
+Regularization (l2): 0.3
 
 Input size: 784
-Layer 1 size: 256       W1.shape = (256, 784)   b1.shape = (256, 1)     Activation: relu
-Layer 2 size: 256       W2.shape = (256, 256)   b2.shape = (256, 1)     Activation: relu
-Layer 3 size: 256       W3.shape = (256, 256)   b3.shape = (256, 1)     Activation: relu
-Layer 4 size: 10        W4.shape = (10, 256)    b4.shape = (10, 1)      Activation: sigmoid
+Layer 1 size: 128       W1.shape = (128, 784)   b1.shape = (128, 1)     Activation: relu
+Layer 2 size: 128       W2.shape = (128, 128)   b2.shape = (128, 1)     Activation: relu
+Layer 3 size: 10        W3.shape = (10, 128)    b3.shape = (10, 1)      Activation: sigmoid
 
 ```
 
 ## Before You Compile
 
-Due to size limitations, `mnist_train.csv` and `mnist_test.csv` are not included in the repo. You can download `mnist_train.csv` and `mnist_test.csv` from [https://www.kaggle.com/oddrationale/mnist-in-csv](https://www.kaggle.com/oddrationale/mnist-in-csv) and place them in the `MNIST-data-set/` directory. 
+Due to size limitations, `mnist_train.csv` and `mnist_test.csv` are not included in the repo. You can download `mnist_train.csv` and `mnist_test.csv` from [https://www.kaggle.com/oddrationale/mnist-in-csv](https://www.kaggle.com/oddrationale/mnist-in-csv) and place them in the `MNIST-data-set/` directory. `train` is set to read from that directory by default.
 
 ## Building and Running the Project
 
